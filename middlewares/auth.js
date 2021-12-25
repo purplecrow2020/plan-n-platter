@@ -12,7 +12,6 @@ async function authGuard(req, res, next) {
             const payload = tokenAuth.verify(config, authKey);
             const user_id = payload['id'];
             const userDetails = await userMysql.getUserById(db.mysql.read, user_id);
-            console.log(userDetails);
             if (!_.isEmpty(userDetails)){
                 req.user = userDetails[0];
                 next();
