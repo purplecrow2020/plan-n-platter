@@ -9,9 +9,8 @@ const envVarsSchema = Joi.object({
     MYSQL_HOST: Joi.string().required().description('Mysql host'),
     MYSQL_USER: Joi.string().required().description('Mysql username'),
     MYSQL_DB: Joi.string().required().description('Mysql dbname'),
-    MYSQL_PASS: Joi.string().allow(null, '')
-
-
+    MYSQL_PASS: Joi.string().allow(null, ''),
+    JWT_SECRET: Joi.string().required().description('jwt secret')
 }).unknown().required();
 
 const { error, value: envVars } = envVarsSchema.validate(process.env);

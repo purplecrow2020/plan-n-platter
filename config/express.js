@@ -23,6 +23,8 @@ db.mysql.write = writeMysql;
 
 
 app.set('db', db);
+app.set('config', config);
+
 
 
 app.use(helmet());

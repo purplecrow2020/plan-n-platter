@@ -48,15 +48,25 @@ async function getCartDetails(req, res, next) {
         if (order_details && order_details.length > 0) {
             order_id = order_details[0]['order_id'];
         }
-        
+        let total_qty = 0;
+        let total_bill = 0;
+
         const cartDetails = await cartMysql.getCartDetails(db.mysql.read, order_id);
+        for (let i=0; i < cartDetails.length; i++) {
+            total_qty += cartDetails[i]['qty'];
+            total_bill += cartDetails[i]['qty'] * cartDetails[i]['price']
+        }
         const responseData = {
             meta: {
                 code: 200,
                 success: true,
                 message: 'Success',
             },
-            data: cartDetails,
+            data: {
+                details: cartDetails,
+                total_qty, 
+                total_bill
+            },
         };
         res.status(responseData.meta.code).json(responseData);
     } catch(e) {
