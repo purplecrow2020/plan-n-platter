@@ -1,5 +1,6 @@
 const userMysql = require('../../../modules/mysql/user');
 const _ = require('lodash');
+const genUsername = require("unique-username-generator");
 const TokenAuth = require('../../../modules/tokenAuth');
 
 async function login(req, res) {
@@ -88,7 +89,8 @@ async function loginAsGuest(req, res) {
         const db = req.app.get('config');
         const insert_obj = {
             mobile: req.body.udid,
-            email_id: req.body.udid
+            email_id: req.body.udid,
+            name: genUsername.generateUsername("", 0, 10)
         };
         const insertedResponse = await userMysql.insertNewUser(db.mysql.write, insert_obj);
         const user_id = insertedResponse.insertId;
@@ -105,7 +107,7 @@ async function loginAsGuest(req, res) {
         };
         res.status(responseData.meta.code).json(responseData);
     } catch (e) {
-
+        console.log(e);
     }
 }
 
