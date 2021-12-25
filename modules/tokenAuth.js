@@ -14,7 +14,7 @@ class TokenAuth {
     }
     
     static verify(config, token, ignoreExpiration = false) {
-        return jwt.verify(token, config.jwt_secret, { ignoreExpiration });
+        return jwt.verify(token, config.jwtSecret, { ignoreExpiration });
     }
 }
 

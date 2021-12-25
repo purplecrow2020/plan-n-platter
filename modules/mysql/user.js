@@ -12,6 +12,11 @@ class User {
         const sql = "INSERT INTO users SET ?";
         return database.query(sql, obj);
     }
+
+    static getUserById(database, user_id) {
+        const sql = `SELECT * from users where id = ${user_id}`;
+        return database.query(sql);
+    }
 }
 
 module.exports = User;
