@@ -30,6 +30,7 @@ async function login(req, res) {
             },
             data: {
                 authKey: TokenAuth.create(user_id, config),
+                username: userDetails[0]['name']
             },
         };
         res.status(responseData.meta.code).json(responseData);
@@ -75,7 +76,8 @@ async function register(req, res) {
                 message: 'Success',
             },
             data: {
-                authKey: token
+                authKey: token,
+                username: userDetails[0]['name'],
             },
         };
         res.status(responseData.meta.code).json(responseData);
@@ -102,7 +104,8 @@ async function loginAsGuest(req, res) {
                 message: 'Success',
             },
             data: {
-                authKey: token
+                authKey: token,
+                username: insert_obj.name
             },
         };
         res.status(responseData.meta.code).json(responseData);
