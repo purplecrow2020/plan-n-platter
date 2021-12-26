@@ -10,5 +10,6 @@ const router = express.Router();
 
 router.route('/get-menu/:vendor_id').get(authGuard, vendorCtrl.getMenu);
 router.route('/get-bestsellers/:vendor_id').get(vendorCtrl.getBestSellers);
+router.route('/get-vendor-details/:vendor_id').get(vendorCtrl.getVendorDetails);
 
 module.exports = router;

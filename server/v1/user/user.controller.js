@@ -77,7 +77,7 @@ async function register(req, res) {
             },
             data: {
                 authKey: token,
-                username: userDetails[0]['name'],
+                username: insert_obj.name,
             },
         };
         res.status(responseData.meta.code).json(responseData);

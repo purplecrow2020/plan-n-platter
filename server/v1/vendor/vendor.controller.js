@@ -1,6 +1,7 @@
 const menuMysql = require('../../../modules/mysql/menu');
 const bestsellersMysql = require('../../../modules/mysql/bestSellers');
 const orderMysql = require('../../../modules/mysql/orders');
+const vendorMysql = require('../../../modules/mysql/vendor');
 
 const _ = require('lodash');
 
@@ -55,8 +56,29 @@ async function getBestSellers(req, res, next) {
     }
 }
 
+async function getVendorDetails(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const { vendor_id } = req.params; 
+        const vendorDetails = await vendorMysql.getVendorById(db.mysql.read, vendor_id);
+        responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: vendorDetails[0],
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+        next(e);
+    }
+}
+
 
 module.exports = {
     getMenu,
     getBestSellers,
+    getVendorDetails,
 }
