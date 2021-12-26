@@ -88,7 +88,8 @@ async function register(req, res) {
 
 async function loginAsGuest(req, res) {
     try {
-        const db = req.app.get('config');
+        const db = req.app.get('db');
+        const config = req.app.get('config');
         const insert_obj = {
             mobile: req.body.udid,
             email_id: req.body.udid,
