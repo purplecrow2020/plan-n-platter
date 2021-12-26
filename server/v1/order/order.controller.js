@@ -2,17 +2,21 @@
 const orderMysql = require('../../../modules/mysql/orders');
 const cartMysql = require('../../../modules/mysql/cart');
 const menuMysql = require('../../../modules/mysql/menu');
+const { required } = require('joi');
+const _ = require('lodash');
 
 async function addToCart(req, res, next) {
     try {
-        const user_id =1;
         const db = req.app.get('db');
+        const user_id = req.user.id;
         const {
             menu_id, 
         } = req.body;
         let order_id;
+        console.log("USER_ID",user_id);
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
-        if (order_details && order_details.length > 0) {
+        console.log("order_details",order_details);
+        if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
         } else {
             order_id = await orderMysql.addNewOrder(db.mysql.read, user_id).then(r=>r.insertId);
@@ -45,7 +49,7 @@ async function getCartDetails(req, res, next) {
         const user_id = req.user.id;
         let order_id;
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
-        if (order_details && order_details.length > 0) {
+        if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
         }
         let total_qty = 0;
@@ -121,7 +125,7 @@ async function deleteItemFromCart(req, res, next) {
         // order id 
         let order_id;
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
-        if (order_details && order_details.length > 0) {
+        if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
         } else {
             throw new Error('no order started');

@@ -8,7 +8,7 @@ const authGuard = require('../../../middlewares/auth');
 const router = express.Router();
 
 router.route('/add-to-cart').post(authGuard, orderCtrl.addToCart);
-router.route('/get-cart-details').get(orderCtrl.getCartDetails);
+router.route('/get-cart-details').get(authGuard, orderCtrl.getCartDetails);
 // router.route('/add-to-cart').post(orderCtrl.addItemToCart);
 router.route('/delete-cart-item').post(authGuard, orderCtrl.deleteItemFromCart);
 
