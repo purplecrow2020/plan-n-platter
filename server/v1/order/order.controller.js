@@ -13,9 +13,7 @@ async function addToCart(req, res, next) {
             menu_id, 
         } = req.body;
         let order_id;
-        console.log("USER_ID",user_id);
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
-        console.log("order_details",order_details);
         if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
         } else {
@@ -147,10 +145,65 @@ async function deleteItemFromCart(req, res, next) {
 
 
 
+async function placeOrder(req, res, next){
+    try {
+        const db = req.app.get('db');
+        const user_id = req.user.id;
+        const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
+        if (order_details && order_details[0].order_id != null) {
+            order_id = order_details[0]['order_id'];
+        } else {
+            throw new Error("ADD ITEMS TO CART FIRST");
+        }
+
+        await cartMysql.placeOrderAddedItems(db.mysql.read, order_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+async function completePayment(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const user_id = req.user.id;
+        const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
+        if (order_details && order_details[0].order_id != null) {
+            order_id = order_details[0]['order_id'];
+        } else {
+            throw new Error("ADD ITEMS TO CART FIRST");
+        }
+
+        await orderMysql.completeOrder(db.mysql.read, order_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch(e) {
+        console.log(e);
+    }
+}
+
 
 module.exports = {
     addToCart,
     getCartDetails,
     // addItemToCart,
     deleteItemFromCart,
+    placeOrder,
+    completePayment,
 }

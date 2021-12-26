@@ -62,5 +62,4 @@ const appConfig = {
     jwtSecret: envVars.JWT_SECRET
 };
 
-console.log(appConfig);
 module.exports = { ...appConfig };

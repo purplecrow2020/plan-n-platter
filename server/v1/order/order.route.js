@@ -11,7 +11,8 @@ router.route('/add-to-cart').post(authGuard, orderCtrl.addToCart);
 router.route('/get-cart-details').get(authGuard, orderCtrl.getCartDetails);
 // router.route('/add-to-cart').post(orderCtrl.addItemToCart);
 router.route('/delete-cart-item').post(authGuard, orderCtrl.deleteItemFromCart);
-
+router.route('/place-order').post(authGuard, orderCtrl.placeOrder);
+router.route('/complete-order').post(authGuard, orderCtrl.completePayment);
 
 
 module.exports = router;

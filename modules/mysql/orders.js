@@ -11,4 +11,9 @@ module.exports = class Orders {
         const sql = "insert into orders SET  ?";
         return database.query(sql, obj);
     }
+
+    static completeOrder(database, order_id) {
+        const sql = "UPDATE orders SET is_completed =1 where order_id = ?";
+        return database.query(sql, order_id);
+    }
 }
