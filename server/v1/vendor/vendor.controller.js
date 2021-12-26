@@ -8,7 +8,7 @@ async function getMenu(req, res) {
     try {
         const db = req.app.get('db');
         const { vendor_id } = req.params; 
-        const user_id =1;
+        const user_id =req.user.id;
         let order_id;
         let menuDetails
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);

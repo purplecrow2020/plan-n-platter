@@ -42,7 +42,7 @@ async function getCartDetails(req, res, next) {
         const {
         } = req.body;
         const db = req.app.get('db');
-        const user_id = 1;
+        const user_id = req.user.id;
         let order_id;
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
         if (order_details && order_details.length > 0) {
@@ -113,7 +113,7 @@ async function getCartDetails(req, res, next) {
 
 async function deleteItemFromCart(req, res, next) {
     try {
-        const user_id =1;
+        const user_id = req.user.id;;
         const db = req.app.get('db');
         const {
             menu_item_id
