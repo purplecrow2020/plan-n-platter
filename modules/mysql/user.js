@@ -4,6 +4,8 @@ class User {
     }
 
     static getUserByEmailPwd(database, mobile, password) {
+        console.log('mobile', mobile);
+        console.log('password', password);
         const sql = "select * from users where mobile=? and password= ?";
         return database.query(sql, [mobile, password]);
     }
