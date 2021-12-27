@@ -18,4 +18,9 @@ module.exports = class Cart {
         const sql = "UPDATE cart SET is_ordered=1 where order_id = ?";
         return database.query(sql, order_id);
     }
+
+    static getOrderDetailsById(database, order_id){
+        const sql = "select * from ((select menu_id, count(id) as qty from cart where order_id = ? group by menu_id) as a left join (select * from menus) as b on a.menu_id = b.id left join (select id , name as vendor_name, address from vendors) as c on b.vendor_id=c.id)";
+        return database.query(sql, order_id);
+    }
 }

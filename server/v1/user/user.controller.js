@@ -115,7 +115,6 @@ async function loginAsGuest(req, res) {
     }
 }
 
-
 module.exports = {
     login,
     register,

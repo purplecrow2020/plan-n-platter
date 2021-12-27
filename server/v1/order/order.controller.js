@@ -199,6 +199,54 @@ async function completePayment(req, res, next) {
 }
 
 
+async function getOrderHistory(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const user_id =  req.user.id;
+        const orders = await orderMysql.getPastOrderIds(db.mysql.read, user_id);
+        console.log(orders);
+        const orderDetailsPromises = [];
+        for (let i=0; i < orders.length; i++) {
+            orderDetailsPromises.push(cartMysql.getOrderDetailsById(db.mysql.read, orders[i]['id']));
+        }
+        const orderDetails = await Promise.all(orderDetailsPromises);
+        console.log(orderDetails);
+        const response = [];
+        for (let i=0; i < orderDetails.length; i++) {
+            let vendor_name = orderDetails[0][0]['vendor_name'];
+            let vendor_address = orderDetails[0][0]['address'];
+            let order_string = "";
+            let bill_string = orders[i]['bill_amount'];
+
+            for(let j=0; j < orderDetails[i].length; j++) {
+                if (j == orderDetails[i].length-1) {
+                    order_string += `${orderDetails[i][j]['name']} ✖ (${orderDetails[i][j]['qty']})`;
+                } else {
+                    order_string += `${orderDetails[i][j]['name']} ✖ (${orderDetails[i][j]['qty']}),`;
+                }
+            }
+            response.push({
+                vendor_name, 
+                vendor_address,
+                order_string,
+                bill_string
+            });
+        }
+
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: response,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 module.exports = {
     addToCart,
     getCartDetails,
@@ -206,4 +254,5 @@ module.exports = {
     deleteItemFromCart,
     placeOrder,
     completePayment,
+    getOrderHistory,
 }
