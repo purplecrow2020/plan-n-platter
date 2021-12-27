@@ -13,6 +13,7 @@ async function login(req, res) {
         } = req.body;
 
         const userDetails = await userMysql.getUserByEmailPwd(db.mysql.read, mobile, password);
+        console.log(userDetails);
         let user_id;
         if (!_.isEmpty(userDetails)) {
             //  token generated
