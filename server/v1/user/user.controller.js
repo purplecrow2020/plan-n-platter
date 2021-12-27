@@ -115,8 +115,28 @@ async function loginAsGuest(req, res) {
     }
 }
 
+async function getUserDetails(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: {
+                ...req.user
+            },
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 module.exports = {
     login,
     register,
-    loginAsGuest
+    loginAsGuest,
+    getUserDetails,
 }
