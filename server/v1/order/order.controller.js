@@ -49,6 +49,8 @@ async function getCartDetails(req, res, next) {
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
         if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
+        } else {
+            throw new Error("no order id");
         }
         let total_qty = 0;
         let total_bill = 0;
@@ -73,6 +75,19 @@ async function getCartDetails(req, res, next) {
         res.status(responseData.meta.code).json(responseData);
     } catch(e) {
         console.log(e);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: {
+                details: [],
+                total_qty: 0, 
+                total_bill:0
+            },
+        };
+        res.status(responseData.meta.code).json(responseData);
     }
 }
 
