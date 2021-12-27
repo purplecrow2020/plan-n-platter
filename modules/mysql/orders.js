@@ -13,7 +13,7 @@ module.exports = class Orders {
     }
 
     static completeOrder(database, order_id) {
-        const sql = "UPDATE orders SET is_completed =1 where order_id = ?";
+        const sql = "UPDATE orders SET is_completed =1 where id = ?";
         return database.query(sql, order_id);
     }
 
