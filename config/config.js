@@ -40,7 +40,7 @@ const appConfig = {
         user: envVars.MYSQL_USER,
         password: envVars.MYSQL_PASS,
         database: envVars.MYSQL_DB,
-        connectionLimit: getPoolConnectionLimit(),
+        connectionLimit: getPoolConnectionLimit(true),
         connectTimeout: 600000,		// 60 * 60 * 1000
         aquireTimeout: 600000,			// 60 * 60 * 1000
         timeout: 600000,				// 60 * 60 * 1000
