@@ -2,6 +2,7 @@
 const orderMysql = require('../../../modules/mysql/orders');
 const cartMysql = require('../../../modules/mysql/cart');
 const menuMysql = require('../../../modules/mysql/menu');
+const quickRequestMysql = require('../../../modules/mysql/quickRequests');
 const { required } = require('joi');
 const _ = require('lodash');
 
@@ -12,12 +13,18 @@ async function addToCart(req, res, next) {
         const {
             menu_id, 
         } = req.body;
+
+        const {
+            vendor_id, 
+            table_id,
+        } = req.headers;
         let order_id;
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
         if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
         } else {
-            order_id = await orderMysql.addNewOrder(db.mysql.read, user_id).then(r=>r.insertId);
+            // get vendor id by menu_id
+            order_id = await orderMysql.addNewOrder(db.mysql.read, user_id, vendor_id, table_id).then(r=>r.insertId);
         }
         const cartItemObj = {
             user_id: user_id,
@@ -54,11 +61,31 @@ async function getCartDetails(req, res, next) {
         }
         let total_qty = 0;
         let total_bill = 0;
+        const promises = [];
+        promises.push(cartMysql.getActiveCartDetails(db.mysql.read, order_id));
+        promises.push(cartMysql.getInProgressOrderDetails(db.mysql.read, order_id));
+        promises.push(cartMysql.getCompletedOrderDetails(db.mysql.read, order_id));
 
-        const cartDetails = await cartMysql.getCartDetails(db.mysql.read, order_id);
-        for (let i=0; i < cartDetails.length; i++) {
-            total_qty += cartDetails[i]['qty'];
-            total_bill += cartDetails[i]['qty'] * cartDetails[i]['price']
+        const [
+            activeCartDetails, 
+            inProgressOrderDetails,
+            completedOrderDetails,
+        ] = await Promise.all(promises);
+
+
+        for (let i=0; i < activeCartDetails.length; i++) {
+            total_qty += activeCartDetails[i]['qty'];
+            total_bill += activeCartDetails[i]['qty'] * activeCartDetails[i]['price']
+        }
+
+        for (let i=0; i < inProgressOrderDetails.length; i++) {
+            total_qty += inProgressOrderDetails[i]['qty'];
+            total_bill += inProgressOrderDetails[i]['qty'] * inProgressOrderDetails[i]['price']
+        }
+
+        for (let i=0; i < completedOrderDetails.length; i++) {
+            total_qty += completedOrderDetails[i]['qty'];
+            total_bill += completedOrderDetails[i]['qty'] * completedOrderDetails[i]['price']
         }
         const responseData = {
             meta: {
@@ -67,7 +94,11 @@ async function getCartDetails(req, res, next) {
                 message: 'Success',
             },
             data: {
-                details: cartDetails,
+                details: {
+                    to_order: activeCartDetails,
+                    in_progress: inProgressOrderDetails,
+                    completed: completedOrderDetails,
+                },
                 total_qty, 
                 total_bill
             },
@@ -82,7 +113,7 @@ async function getCartDetails(req, res, next) {
                 message: 'Success',
             },
             data: {
-                details: [],
+                details: null,
                 total_qty: 0, 
                 total_bill:0
             },
@@ -171,7 +202,7 @@ async function placeOrder(req, res, next){
             throw new Error("ADD ITEMS TO CART FIRST");
         }
 
-        await cartMysql.placeOrderAddedItems(db.mysql.read, order_id);
+        await cartMysql.placeOrderAddedItems(db.mysql.write, order_id);
         const responseData = {
             meta: {
                 code: 200,
@@ -219,13 +250,11 @@ async function getOrderHistory(req, res, next) {
         const db = req.app.get('db');
         const user_id =  req.user.id;
         const orders = await orderMysql.getPastOrderIds(db.mysql.read, user_id);
-        console.log(orders);
         const orderDetailsPromises = [];
         for (let i=0; i < orders.length; i++) {
             orderDetailsPromises.push(cartMysql.getOrderDetailsById(db.mysql.read, orders[i]['id']));
         }
         const orderDetails = await Promise.all(orderDetailsPromises);
-        console.log(orderDetails);
         const response = [];
         for (let i=0; i < orderDetails.length; i++) {
             let vendor_name = orderDetails[0][0]['vendor_name'];
@@ -233,7 +262,7 @@ async function getOrderHistory(req, res, next) {
             let order_string = "";
             let bill_string = orders[i]['bill_amount'];
 
-            for(let j=0; j < orderDetails[i].length; j++) {
+            for(let j=0; j < orderDetails[i]. length; j++) {
                 if (j == orderDetails[i].length-1) {
                     order_string += `${orderDetails[i][j]['name']} ✖ (${orderDetails[i][j]['qty']})`;
                 } else {
@@ -262,6 +291,68 @@ async function getOrderHistory(req, res, next) {
     }
 }
 
+async function registerQuickRequest(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            id, 
+        } = req.user;
+
+        const {
+            vendor_id, 
+            table_id,
+        } = req.headers;
+
+        const {
+            request
+        } = req.body;
+
+        const obj = {
+            user_id: id, 
+            vendor_id,
+            table_id, 
+            request,
+        }
+        const requestsResponse = await quickRequestMysql.addNewRequest(db.mysql.write, obj);
+
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch(e) {
+        console.log(e);
+        next(e);
+    }
+}
+
+async function resolveQuickRequest(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            request_id
+        } = req.body;
+
+        await quickRequestMysql.resolveRequestById(db.mysql.write, request_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch(e) {
+        console.log(e);
+        next(e);
+    }
+}
+
 module.exports = {
     addToCart,
     getCartDetails,
@@ -270,4 +361,6 @@ module.exports = {
     placeOrder,
     completePayment,
     getOrderHistory,
+    registerQuickRequest,
+    resolveQuickRequest,
 }

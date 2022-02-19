@@ -22,4 +22,14 @@ module.exports = class Menu {
         const sql = `select * from menus where name like '%${menu_item_search_string}%'`;
         return database.query(sql);
     }
+
+    static insertItem(database, obj) {
+        const sql = "INSERT into menus SET ?";
+        return database.query(sql, obj);
+    }
+    
+    static getMenuCategories(database) {
+        const sql = "select * from menu_categories where is_active =1 order by priority asc";
+        return database.query(sql);
+    }
 }

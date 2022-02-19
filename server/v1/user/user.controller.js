@@ -1,4 +1,5 @@
 const userMysql = require('../../../modules/mysql/user');
+const menuMysql = require('../../../modules/mysql/menu');
 const _ = require('lodash');
 const genUsername = require("unique-username-generator");
 const TokenAuth = require('../../../modules/tokenAuth');
@@ -134,6 +135,8 @@ async function getUserDetails(req, res, next) {
         console.log(e);
     }
 }
+
+
 
 module.exports = {
     login,

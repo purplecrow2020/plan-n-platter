@@ -4,9 +4,11 @@ module.exports = class Orders {
         return database.query(sql, user_id);
     }
 
-    static addNewOrder(database, user_id) {
+    static addNewOrder(database, user_id, vendor_id, table_id) {
         const obj = {
             user_id,
+            vendor_id,
+            table_id,
         }
         const sql = "insert into orders SET  ?";
         return database.query(sql, obj);
@@ -20,5 +22,10 @@ module.exports = class Orders {
     static getPastOrderIds(database, user_id) {
         const sql ="select * from orders  where user_id=? and is_completed=1 order by created_at desc limit 10";
         return database.query(sql, user_id);
+    }
+
+    static getActiveOrderByVendorId(database, vendor_id) {
+        const sql = "select * from orders where vendor_id = ? and is_completed = 0";
+        return database.query(sql, vendor_id);
     }
 }

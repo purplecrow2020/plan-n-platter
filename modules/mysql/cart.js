@@ -4,8 +4,18 @@ module.exports = class Cart {
         return database.query(sql, obj);
     }
 
-    static getCartDetails(database, order_id) {
+    static getActiveCartDetails(database, order_id) {
         const sql = "select * from ((select menu_id, count(id) as qty  from cart where order_id =? and is_ordered !=1 group by  menu_id) as a left join (select * from menus) as b on a.menu_id = b.id)";
+        return database.query(sql, order_id);
+    }
+
+    static getInProgressOrderDetails(database, order_id) {
+        const sql = "select * from ((select menu_id, count(id) as qty  from cart where order_id =? and is_ordered=1 and is_completed=0 group by  menu_id) as a left join (select * from menus) as b on a.menu_id = b.id)";
+        return database.query(sql, order_id);
+    }
+
+    static getCompletedOrderDetails(database, order_id) {
+        const sql = "select * from ((select menu_id, count(id) as qty  from cart where order_id =? and is_ordered=1 and is_completed=1 group by  menu_id) as a left join (select * from menus) as b on a.menu_id = b.id)";
         return database.query(sql, order_id);
     }
 
@@ -21,6 +31,11 @@ module.exports = class Cart {
 
     static getOrderDetailsById(database, order_id){
         const sql = "select * from ((select menu_id, count(id) as qty from cart where order_id = ? group by menu_id) as a left join (select * from menus) as b on a.menu_id = b.id left join (select id , name as vendor_name, address from vendors) as c on b.vendor_id=c.id)";
+        return database.query(sql, order_id);
+    }
+
+    static getOrderCompleteDetailsById(database, order_id) {
+        const sql = "select * from ((select * from cart where order_id = ?) as a left join (select * from menus) as b on a.menu_id= b.id)";
         return database.query(sql, order_id);
     }
 }

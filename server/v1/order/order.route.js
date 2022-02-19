@@ -14,6 +14,8 @@ router.route('/delete-cart-item').post(authGuard, orderCtrl.deleteItemFromCart);
 router.route('/place-order').post(authGuard, orderCtrl.placeOrder);
 router.route('/complete-order').post(authGuard, orderCtrl.completePayment);
 router.route('/past-orders-summary').get(authGuard, orderCtrl.getOrderHistory);
+router.route('/quick-request').post(authGuard, orderCtrl.registerQuickRequest);
+router.route('/resolve-quick-request').post(authGuard, orderCtrl.resolveQuickRequest);
 
 
 module.exports = router;

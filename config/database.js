@@ -14,7 +14,7 @@ module.exports = class Database {
                 }
                 resolve(rows);
             });
-        });
+    });
     }
 
     transactionalQuery(conn, sql, args) {
