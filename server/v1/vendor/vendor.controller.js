@@ -298,6 +298,50 @@ async function getQuickRequests(req, res, next) {
     }
 }
 
+async function deleteMenuItem(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            menu_item_id
+        } = req.body;
+
+        await menuMysql.deleteItemById(db.mysql.write, menu_item_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function completeOrderByMenuItem(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            menu_item_id,
+            order_id,  
+        } = req.body;
+
+        await cartMysql.completeMenuItemOrder(db.mysql.write, menu_item_id, order_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 module.exports = {
     getMenu,
@@ -309,4 +353,6 @@ module.exports = {
     getVendorActiveOrders,
     getMenuCategories,
     getQuickRequests,
+    deleteMenuItem,
+    completeOrderByMenuItem,
 }

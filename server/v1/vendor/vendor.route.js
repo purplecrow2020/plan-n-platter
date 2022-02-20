@@ -18,6 +18,9 @@ router.route('/add-bestsellers').post(vendorGuard, vendorCtrl.addMenuItemToBests
 router.route('/get-active-orders').get(vendorGuard, vendorCtrl.getVendorActiveOrders);
 router.route('/get-menu-categories').get(vendorGuard, vendorCtrl.getMenuCategories);
 router.route('/get-unresolved-quick-requests').get(vendorGuard, vendorCtrl.getQuickRequests);
+router.route('/delete-menu-item').post(vendorGuard, vendorCtrl.deleteMenuItem);
+router.route('/completed-menu-item-order').post(vendorGuard, vendorCtrl.completeOrderByMenuItem);
+
 
 
 

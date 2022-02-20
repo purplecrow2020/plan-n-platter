@@ -32,4 +32,9 @@ module.exports = class Menu {
         const sql = "select * from menu_categories where is_active =1 order by priority asc";
         return database.query(sql);
     }
+    
+    static deleteItemById(database, menu_item_id) {
+        const sql = "DELETE from menus where id = ?";
+        return database.query(sql, menu_item_id);
+    }
 }

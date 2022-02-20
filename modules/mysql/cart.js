@@ -38,4 +38,10 @@ module.exports = class Cart {
         const sql = "select * from ((select * from cart where order_id = ?) as a left join (select * from menus) as b on a.menu_id= b.id)";
         return database.query(sql, order_id);
     }
+
+    static completeMenuItemOrder(database, menu_id, order_id) {
+        console.log(menu_id, order_id);
+        const sql ="UPDATE cart SET is_completed = 1 where order_id = ? and menu_id = ?";
+        return database.query(sql, [order_id, menu_id]);
+    }
 }
