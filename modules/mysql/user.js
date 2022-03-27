@@ -19,6 +19,11 @@ class User {
         const sql = `SELECT * from users where id = ${user_id}`;
         return database.query(sql);
     }
+
+    static updateGuestLoginDetails(database, user_id, obj) {
+        const sql = "update users SET ? where id = ?";
+        return database.query(sql, [obj, user_id]);
+    }
 }
 
 module.exports = User;

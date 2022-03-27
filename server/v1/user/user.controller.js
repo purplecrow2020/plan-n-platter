@@ -3,6 +3,7 @@ const menuMysql = require('../../../modules/mysql/menu');
 const _ = require('lodash');
 const genUsername = require("unique-username-generator");
 const TokenAuth = require('../../../modules/tokenAuth');
+const req = require('express/lib/request');
 
 async function login(req, res) {
     try {
@@ -93,7 +94,7 @@ async function loginAsGuest(req, res) {
         const db = req.app.get('db');
         const config = req.app.get('config');
         const insert_obj = {
-            mobile: req.body.udid,
+            // mobile: req.body.udid,
             email_id: req.body.udid,
             name: genUsername.generateUsername("", 0, 10)
         };
@@ -109,6 +110,32 @@ async function loginAsGuest(req, res) {
             data: {
                 authKey: token,
                 username: insert_obj.name
+            },
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function guestLoginUpdate(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const config = req.app.get('config');
+        const updateObj = {
+            mobile: req.body.mobile,
+            password: req.body.password,
+        };
+        const updateResponse = await userMysql.updateGuestLoginDetails(db.mysql.write, req.user.id, updateObj);
+        const token = TokenAuth.create(req.user.id, config);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: {
+                authKey: token,
             },
         };
         res.status(responseData.meta.code).json(responseData);
@@ -143,4 +170,5 @@ module.exports = {
     register,
     loginAsGuest,
     getUserDetails,
+    guestLoginUpdate
 }
