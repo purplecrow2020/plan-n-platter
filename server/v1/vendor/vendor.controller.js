@@ -257,6 +257,71 @@ async function getVendorActiveOrders(req, res, next) {
 }
 
 
+async function getVendorCompletedOrders(req, res) {
+    try {
+        const db = req.app.get('db');
+        const {
+            id: vendor_id
+        } = req.user;
+        const completedOrders = await orderMysql.getCompletedOrderByVendorId(db.mysql.read, vendor_id);
+        const cartDetailsPromises = [];
+        for (let i=0; i < completedOrders.length; i++) {
+            let order_id = completedOrders[i]['id'];
+            cartDetailsPromises.push(cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id));
+        }
+
+        const orderDetails = await Promise.all(cartDetailsPromises);
+        const data = [];
+        for (let j=0; j < orderDetails.length; j++) {
+            const orderDetail = orderDetails[j];
+            const order = {};
+            const details = {};
+            for (let k=0; k < orderDetail.length; k++) {
+                const menu_id = orderDetail[k].menu_id;
+                if (orderDetail[k].menu_id in details) {
+                    details[menu_id].qty += 1;
+                    details[menu_id].price += Math.floor((details[menu_id].price)/ (details[menu_id].qty-1));
+                } else {
+                    details[menu_id] = {
+                        name: orderDetail[k].name,
+                        price: parseInt(orderDetail[k].price),
+                        qty: 1,
+                    }
+                }
+            }
+            order.user_id = completedOrders[j].user_id;
+            order.table_id = completedOrders[j].table_id;
+            order.order_id = completedOrders[j].id;
+            order.timestamp = completedOrders[j].created_at;
+            order.details = {
+             ...details
+            }
+            data.push(order);
+        }
+
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: [],
+        };
+        res.status(responseData.meta.code).json(responseData);
+    }
+}
+
 async function getMenuCategories(req, res, next) {
     try {
         const db = req.app.get('db');
@@ -355,4 +420,5 @@ module.exports = {
     getQuickRequests,
     deleteMenuItem,
     completeOrderByMenuItem,
+    getVendorCompletedOrders,
 }
