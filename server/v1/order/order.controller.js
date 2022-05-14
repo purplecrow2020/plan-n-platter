@@ -61,6 +61,7 @@ async function getCartDetails(req, res, next) {
         }
         let total_qty = 0;
         let total_bill = 0;
+        let total_discount = 0;
         const promises = [];
         promises.push(cartMysql.getActiveCartDetails(db.mysql.read, order_id));
         promises.push(cartMysql.getInProgressOrderDetails(db.mysql.read, order_id));
@@ -73,19 +74,29 @@ async function getCartDetails(req, res, next) {
         ] = await Promise.all(promises);
 
 
+        console.log(activeCartDetails);
         for (let i=0; i < activeCartDetails.length; i++) {
             total_qty += activeCartDetails[i]['qty'];
-            total_bill += activeCartDetails[i]['qty'] * activeCartDetails[i]['price']
+            total_bill += activeCartDetails[i]['qty'] * activeCartDetails[i]['price'];
+            if (!_.isNull(activeCartDetails[i]['discount'])) {
+                total_discount += activeCartDetails[i]['qty'] * activeCartDetails[i]['price'] * activeCartDetails[i]['discount'] * 0.01;
+            }
         }
 
         for (let i=0; i < inProgressOrderDetails.length; i++) {
             total_qty += inProgressOrderDetails[i]['qty'];
-            total_bill += inProgressOrderDetails[i]['qty'] * inProgressOrderDetails[i]['price']
+            total_bill += inProgressOrderDetails[i]['qty'] * inProgressOrderDetails[i]['price'];
+            if (!_.isNull(inProgressOrderDetails[i]['discount'])) {
+                total_discount += inProgressOrderDetails[i]['qty'] * inProgressOrderDetails[i]['price'] * inProgressOrderDetails[i]['discount'] * 0.01;
+            }
         }
 
         for (let i=0; i < completedOrderDetails.length; i++) {
             total_qty += completedOrderDetails[i]['qty'];
-            total_bill += completedOrderDetails[i]['qty'] * completedOrderDetails[i]['price']
+            total_bill += completedOrderDetails[i]['qty'] * completedOrderDetails[i]['price'];
+            if (!_.isNull(completedOrderDetails[i]['discount'])) {
+                total_discount += completedOrderDetails[i]['qty'] * completedOrderDetails[i]['price'] * completedOrderDetails[i]['discount'] * 0.01;
+            }
         }
         const responseData = {
             meta: {
@@ -100,7 +111,8 @@ async function getCartDetails(req, res, next) {
                     completed: completedOrderDetails,
                 },
                 total_qty, 
-                total_bill
+                total_bill,
+                total_discount,
             },
         };
         res.status(responseData.meta.code).json(responseData);
@@ -115,7 +127,8 @@ async function getCartDetails(req, res, next) {
             data: {
                 details: null,
                 total_qty: 0, 
-                total_bill:0
+                total_bill:0,
+                total_discount: 0,
             },
         };
         res.status(responseData.meta.code).json(responseData);
