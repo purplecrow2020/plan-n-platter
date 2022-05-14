@@ -22,7 +22,4 @@ router.route('/get-unresolved-quick-requests').get(vendorGuard, vendorCtrl.getQu
 router.route('/delete-menu-item').post(vendorGuard, vendorCtrl.deleteMenuItem);
 router.route('/completed-menu-item-order').post(vendorGuard, vendorCtrl.completeOrderByMenuItem);
 
-
-
-
 module.exports = router;

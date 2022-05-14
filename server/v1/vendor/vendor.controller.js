@@ -5,7 +5,7 @@ const vendorMysql = require('../../../modules/mysql/vendor');
 const cartMysql = require('../../../modules/mysql/cart');
 const quickRequestMysql = require('../../../modules/mysql/quickRequests');
 const TokenAuth = require('../../../modules/tokenAuth');
-
+const moment = require('moment');
 
 
 const _ = require('lodash');
@@ -261,9 +261,15 @@ async function getVendorCompletedOrders(req, res) {
     try {
         const db = req.app.get('db');
         const {
-            id: vendor_id
+            id: vendor_id,
         } = req.user;
-        const completedOrders = await orderMysql.getCompletedOrderByVendorId(db.mysql.read, vendor_id);
+
+        const {
+            from, 
+            to,
+        } = req.query;
+
+        const completedOrders = await orderMysql.getCompletedOrderByVendorId(db.mysql.read, vendor_id, from, to);
         const cartDetailsPromises = [];
         for (let i=0; i < completedOrders.length; i++) {
             let order_id = completedOrders[i]['id'];
@@ -292,7 +298,7 @@ async function getVendorCompletedOrders(req, res) {
             order.user_id = completedOrders[j].user_id;
             order.table_id = completedOrders[j].table_id;
             order.order_id = completedOrders[j].id;
-            order.timestamp = completedOrders[j].created_at;
+            order.timestamp = moment(completedOrders[j].created_at).format('MM/DD/YYYY HH:mm:ss');
             order.details = {
              ...details
             }
