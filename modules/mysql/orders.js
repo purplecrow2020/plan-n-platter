@@ -16,9 +16,14 @@ module.exports = class Orders {
         return database.query(sql, obj);
     }
 
-    static completeOrder(database, order_id) {
-        const sql = "UPDATE orders SET is_completed =1 where id = ?";
-        return database.query(sql, order_id);
+    static completeOrder(database, order_id, payable_amt, discount) {
+        const update_obj = {
+            is_completed: 1,
+            amt_payable: payable_amt,
+            discount,
+        }
+        const sql = "UPDATE orders SET ? where id = ?";
+        return database.query(sql, [update_obj, order_id]);
     }
 
     static getPastOrderIds(database, user_id) {

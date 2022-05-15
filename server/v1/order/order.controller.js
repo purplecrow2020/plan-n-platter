@@ -236,13 +236,26 @@ async function completePayment(req, res, next) {
         const db = req.app.get('db');
         const user_id = req.user.id;
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
+        console.log("IRDER ID", order_details);
+        let total_bill = 0;
+        let total_discount = 0;
+        let payable_amt;
         if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
+            const cartDetails =await cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id);
+            for (let i=0; i < cartDetails.length; i++) {
+                if(cartDetails[i]['is_ordered']) {
+                    total_bill += parseInt(cartDetails[i]['price']);
+                    if (!_.isNull(cartDetails[i]['discount'] )) {
+                        total_discount += parseInt(cartDetails[i]['price']) * parseInt(cartDetails[i]['discount']) * 0.01;
+                    }
+                }
+            }
+            payable_amt = total_bill - total_discount;
         } else {
             throw new Error("ADD ITEMS TO CART FIRST");
         }
-
-        await orderMysql.completeOrder(db.mysql.read, order_id);
+        await orderMysql.completeOrder(db.mysql.read, order_id, payable_amt, total_discount);
         const responseData = {
             meta: {
                 code: 200,
@@ -254,6 +267,15 @@ async function completePayment(req, res, next) {
         res.status(responseData.meta.code).json(responseData);
     } catch(e) {
         console.log(e);
+        const responseData = {
+            meta: {
+                code: 500,
+                success: false,
+                message: 'No items in cart',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
     }
 }
 
