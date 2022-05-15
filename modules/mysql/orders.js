@@ -59,4 +59,33 @@ module.exports = class Orders {
         console.log(sql);
         return database.query(sql);
     }
+
+    static getVendorSalesMetrics(database, vendor_id, from_date, to_date) {
+        let from_clause = "";
+        let to_clause = "";
+        if (!_.isEmpty(from_date)) {
+            from_clause = `created_at >= '${moment(from_date).format('YYYY-MM-DD')} 00:00:00'`;
+        }
+
+        if (!_.isEmpty(to_date)) {
+            to_clause = `created_at <= '${moment(to_date).format('YYYY-MM-DD')} 23:59:59'`;
+        }
+    
+        let time_condition_clause = "";
+        if (from_clause.length > 0) {
+            time_condition_clause += " AND " + from_clause;
+        }
+
+        if (to_clause.length > 0) {
+            time_condition_clause += " AND " + to_clause;
+        }
+
+        if (!time_condition_clause.length > 0) {
+            time_condition_clause += " AND created_at >= CURRENT_DATE ";
+        }
+        const sql = `select count(id) as num_orders, sum(amt_payable) as total_amount_collected, sum(discount) as total_discounts from orders where vendor_id = ${vendor_id} and is_completed=1 ${time_condition_clause}`;
+        console.log(sql);
+        return database.query(sql);
+    }
 }
+

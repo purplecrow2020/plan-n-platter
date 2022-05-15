@@ -414,6 +414,33 @@ async function completeOrderByMenuItem(req, res, next) {
     }
 }
 
+async function getVendorSalesMetrics(req, res, next) {
+    try {
+        const db =req.app.get('db');
+        const {
+            id: vendor_id
+        } = req.user;
+        const {
+            from, 
+            to,
+        } = req.body;
+    
+        const salesMetrics = await orderMysql.getVendorSalesMetrics(db.mysql.read, vendor_id, from, to);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: salesMetrics[0],
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+    } 
+   
+}
+
 module.exports = {
     getMenu,
     getBestSellers,
@@ -427,4 +454,5 @@ module.exports = {
     deleteMenuItem,
     completeOrderByMenuItem,
     getVendorCompletedOrders,
+    getVendorSalesMetrics,
 }
