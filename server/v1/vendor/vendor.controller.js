@@ -441,6 +441,40 @@ async function getVendorSalesMetrics(req, res, next) {
    
 }
 
+
+async function getActiveOrdersByVendorTableId(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            vendor_id,
+            table_id,
+        } = req.query;
+        console.log(vendor_id, table_id)
+
+        const activeOrderByTableDetails = await orderMysql.getActiveOrderDetailsByVendorTable(db.mysql.read, vendor_id, table_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: activeOrderByTableDetails,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: [],
+        };
+        res.status(responseData.meta.code).json(responseData);
+    }
+}
+
 module.exports = {
     getMenu,
     getBestSellers,
@@ -455,4 +489,5 @@ module.exports = {
     completeOrderByMenuItem,
     getVendorCompletedOrders,
     getVendorSalesMetrics,
+    getActiveOrdersByVendorTableId,
 }
