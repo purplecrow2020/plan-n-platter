@@ -87,5 +87,18 @@ module.exports = class Orders {
         console.log(sql);
         return database.query(sql);
     }
+
+    static updateIsActiveStatus(database, order_id) {
+        const update_obj = {
+            is_active: 1,
+        }
+        const sql = "UPDATE orders SET ? where order_id = ?";
+        return database.query(sql, [update_obj, order_id]);
+    }
+
+    static getActiveOrderDetailsByVendorTable(database, vendor_id, table_id) {
+        const sql = "select * from orders where vendor_id = ? and table_id = ? and is_active = 1";
+        return database.query(sql, [vendor_id, table_id]);
+    }
 }
 

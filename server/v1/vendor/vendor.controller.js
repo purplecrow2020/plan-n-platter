@@ -195,7 +195,10 @@ async function getVendorActiveOrders(req, res, next) {
             cartDetailsPromises.push(cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id));
         }
 
-        const orderDetails = await Promise.all(cartDetailsPromises);
+        cartDetailsPromises.push(quickRequestMysql.getUnresolvedRequestsByVendorId(db.mysql.read, vendor_id));
+        const resolvedPromises = await Promise.all(cartDetailsPromises);
+        const quickRequests = resolvedPromises.pop();
+        const orderDetails = resolvedPromises;
         const data = [];
         for (let j=0; j < orderDetails.length; j++) {
             const orderDetail = orderDetails[j];
@@ -213,6 +216,7 @@ async function getVendorActiveOrders(req, res, next) {
                             name: orderDetail[k].name,
                             price: parseInt(orderDetail[k].price),
                             qty: 1,
+                            order_time: orderDetail[k]['updated_at'],
                         }
                     }
                 }
@@ -238,6 +242,14 @@ async function getVendorActiveOrders(req, res, next) {
                 completed,
             }
             data.push(order);
+        }
+
+
+        for (let i=0; i < data.length; i++) {
+            const order = data[i];
+            const table_id = order.table_id;
+            const quick_request_for_table = quickRequests.filter(x => x.table_id == table_id);
+            order.quick_requests  = quick_request_for_table;
         }
 
         const responseData = {
@@ -441,6 +453,40 @@ async function getVendorSalesMetrics(req, res, next) {
    
 }
 
+
+async function getActiveOrdersByVendorTableId(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            vendor_id,
+            table_id,
+        } = req.query;
+        console.log(vendor_id, table_id)
+
+        const activeOrderByTableDetails = await orderMysql.getActiveOrderDetailsByVendorTable(db.mysql.read, vendor_id, table_id);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: activeOrderByTableDetails,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: [],
+        };
+        res.status(responseData.meta.code).json(responseData);
+    }
+}
+
 module.exports = {
     getMenu,
     getBestSellers,
@@ -455,4 +501,5 @@ module.exports = {
     completeOrderByMenuItem,
     getVendorCompletedOrders,
     getVendorSalesMetrics,
+    getActiveOrdersByVendorTableId,
 }

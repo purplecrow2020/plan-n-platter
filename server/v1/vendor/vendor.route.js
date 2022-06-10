@@ -22,5 +22,7 @@ router.route('/get-unresolved-quick-requests').get(vendorGuard, vendorCtrl.getQu
 router.route('/delete-menu-item').post(vendorGuard, vendorCtrl.deleteMenuItem);
 router.route('/completed-menu-item-order').post(vendorGuard, vendorCtrl.completeOrderByMenuItem);
 router.route('/get-vendor-sales-metrics').post(vendorGuard, vendorCtrl.getVendorSalesMetrics);
+router.route('/get-active-order-details-by-vendor-table').get(vendorCtrl.getActiveOrdersByVendorTableId);
+
 
 module.exports = router;
