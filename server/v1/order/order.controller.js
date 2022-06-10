@@ -289,29 +289,39 @@ async function completePayment(req, res, next) {
         const {
             id: vendor_id
         } = req.user;
-       console.log(typeof req.body);
-       console.log(req.body);
+       const {
+        is_cancelled,
+       } = req.body;
+
         const order_details = await orderMysql.getOrderIdByTableAndVendorId(db.mysql.read, vendor_id, req.body.table_id);
         console.log("IRDER ID", order_details);
-        let total_bill = 0;
-        let total_discount = 0;
-        let payable_amt;
-        if (order_details && order_details[0].id != null) {
-            order_id = order_details[0]['id'];
-            const cartDetails =await cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id);
-            for (let i=0; i < cartDetails.length; i++) {
-                if(cartDetails[i]['is_ordered']) {
-                    total_bill += parseInt(cartDetails[i]['price']);
-                    if (!_.isNull(cartDetails[i]['discount'] )) {
-                        total_discount += parseInt(cartDetails[i]['price']) * parseInt(cartDetails[i]['discount']) * 0.01;
+        if (!is_cancelled) {
+            let total_bill = 0;
+            let total_discount = 0;
+            let payable_amt;
+            if (order_details && order_details[0].id != null) {
+                order_id = order_details[0]['id'];
+                const cartDetails =await cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id);
+                for (let i=0; i < cartDetails.length; i++) {
+                    if(cartDetails[i]['is_ordered']) {
+                        total_bill += parseInt(cartDetails[i]['price']);
+                        if (!_.isNull(cartDetails[i]['discount'] )) {
+                            total_discount += parseInt(cartDetails[i]['price']) * parseInt(cartDetails[i]['discount']) * 0.01;
+                        }
                     }
                 }
+                payable_amt = total_bill - total_discount;
+            } else {
+                throw new Error("ADD ITEMS TO CART FIRST");
             }
-            payable_amt = total_bill - total_discount;
+            await orderMysql.completeOrder(db.mysql.read, order_id, payable_amt, total_discount);
         } else {
-            throw new Error("ADD ITEMS TO CART FIRST");
+            if (order_details && order_details[0].id != null) {
+                order_id = order_details[0]['id'];
+                await orderMysql.completeCancelledOrder(db.mysql.write, order_id);
+            }
+
         }
-        await orderMysql.completeOrder(db.mysql.read, order_id, payable_amt, total_discount);
         const responseData = {
             meta: {
                 code: 200,

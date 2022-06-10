@@ -26,6 +26,16 @@ module.exports = class Orders {
         return database.query(sql, [update_obj, order_id]);
     }
 
+    static completeCancelledOrder(database, order_id) {
+        const update_obj = {
+            is_completed: 1, 
+            is_cancelled: 1,
+        }
+        const sql = "UPDATE orders SET  ? WHERE id = ?";
+        return database.query(sql, [update_obj, order_id]);
+
+    }
+
     static getPastOrderIds(database, user_id) {
         const sql ="select * from orders  where user_id=? and is_completed=1 order by created_at desc limit 10";
         return database.query(sql, user_id);
