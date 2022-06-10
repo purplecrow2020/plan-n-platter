@@ -14,6 +14,7 @@ router.route('/get-bestsellers/:vendor_id').get(vendorCtrl.getBestSellers);
 router.route('/get-vendor-details/:vendor_id').get(vendorCtrl.getVendorDetails);
 router.route('/login').post(vendorCtrl.login);
 router.route('/add-menu-item').post(vendorGuard, vendorCtrl.addMenuItems);
+router.route('/edit-menu-item').post(vendorGuard, vendorCtrl.updateMenuItemDetailsByVendor);
 router.route('/add-bestsellers').post(vendorGuard, vendorCtrl.addMenuItemToBestsellers);
 router.route('/get-active-orders').get(vendorGuard, vendorCtrl.getVendorActiveOrders);
 router.route('/get-completed-orders').get(vendorGuard, vendorCtrl.getVendorCompletedOrders);

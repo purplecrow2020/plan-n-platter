@@ -9,6 +9,7 @@ const moment = require('moment');
 
 
 const _ = require('lodash');
+const { update } = require('lodash');
 
 async function getMenu(req, res, next) {
     try {
@@ -39,6 +40,7 @@ async function getMenu(req, res, next) {
         next(e);
     }
 }
+
 
 async function getBestSellers(req, res, next) {
     try {
@@ -144,6 +146,60 @@ async function addMenuItems(req, res, next) {
         };
         res.status(responseData.meta.code).json(responseData);
     } catch (e) {
+        console.log(e);
+        next(e);
+    }
+}
+
+
+async function updateMenuItemDetailsByVendor(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            name, 
+            category, 
+            img_url, 
+            price, 
+            dietary_flag,
+            item_id,
+            is_active,
+        } = req.body;
+
+        const udpateObj ={};
+        if (typeof name !== 'undefined') {
+            udpateObj.name = name;
+        }
+
+        if (typeof is_active !== 'undefined') {
+            udpateObj.is_active = is_active;
+        }
+
+        if (typeof category !== 'undefined') {
+            udpateObj.category = category;
+        }
+
+        if (typeof img_url !== 'undefined') {
+            udpateObj.img_url = img_url;
+        }
+
+        if (typeof price !== 'undefined') {
+            udpateObj.price = price;
+        }
+
+        if (typeof dietary_flag !== 'undefined') {
+            udpateObj.dietary_flag = dietary_flag;
+        }
+        const updateDetails = await menuMysql.updatetItem(db.mysql.write, udpateObj, item_id); 
+        responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch(e) {
         console.log(e);
         next(e);
     }
@@ -506,4 +562,5 @@ module.exports = {
     getVendorCompletedOrders,
     getVendorSalesMetrics,
     getActiveOrdersByVendorTableId,
+    updateMenuItemDetailsByVendor,
 }

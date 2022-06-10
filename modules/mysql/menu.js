@@ -27,6 +27,12 @@ module.exports = class Menu {
         const sql = "INSERT into menus SET ?";
         return database.query(sql, obj);
     }
+
+    static updatetItem(database, update_obj, id) {
+        console.log(update_obj);
+        const sql = "UPDATE menus SET ? where id = ?";
+        return database.query(sql, [update_obj, id]);
+    }
     
     static getMenuCategories(database) {
         const sql = "select * from menu_categories where is_active =1 order by priority asc";
