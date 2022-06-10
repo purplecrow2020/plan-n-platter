@@ -92,7 +92,7 @@ module.exports = class Orders {
         const update_obj = {
             is_active: 1,
         }
-        const sql = "UPDATE orders SET ? where order_id = ?";
+        const sql = "UPDATE orders SET ? where id = ?";
         return database.query(sql, [update_obj, order_id]);
     }
 
