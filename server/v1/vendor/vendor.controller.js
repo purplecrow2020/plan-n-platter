@@ -195,7 +195,10 @@ async function getVendorActiveOrders(req, res, next) {
             cartDetailsPromises.push(cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id));
         }
 
-        const orderDetails = await Promise.all(cartDetailsPromises);
+        cartDetailsPromises.push(quickRequestMysql.getUnresolvedRequestsByVendorId(db.mysql.read, vendor_id));
+        const resolvedPromises = await Promise.all(cartDetailsPromises);
+        const quickRequests = resolvedPromises.pop();
+        const orderDetails = resolvedPromises;
         const data = [];
         for (let j=0; j < orderDetails.length; j++) {
             const orderDetail = orderDetails[j];
@@ -213,6 +216,7 @@ async function getVendorActiveOrders(req, res, next) {
                             name: orderDetail[k].name,
                             price: parseInt(orderDetail[k].price),
                             qty: 1,
+                            order_time: orderDetail[k]['updated_at'],
                         }
                     }
                 }
@@ -238,6 +242,14 @@ async function getVendorActiveOrders(req, res, next) {
                 completed,
             }
             data.push(order);
+        }
+
+
+        for (let i=0; i < data.length; i++) {
+            const order = data[i];
+            const table_id = order.table_id;
+            const quick_request_for_table = quickRequests.filter(x => x.table_id == table_id);
+            order.quick_requests  = quick_request_for_table;
         }
 
         const responseData = {

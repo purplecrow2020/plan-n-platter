@@ -216,7 +216,7 @@ async function placeOrder(req, res, next){
         }
 
         await cartMysql.placeOrderAddedItems(db.mysql.write, order_id);
-        orderMysql.updateIsActiveStatus(db.msqyl.write, order_id);
+        orderMysql.updateIsActiveStatus(db.mysql.write, order_id);
         const responseData = {
             meta: {
                 code: 200,
