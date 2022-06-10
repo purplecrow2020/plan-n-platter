@@ -189,6 +189,7 @@ async function getVendorActiveOrders(req, res, next) {
             id: vendor_id
         } = req.user;
         const activeOrders = await orderMysql.getActiveOrderByVendorId(db.mysql.read, vendor_id);
+        console.log(activeOrders);
         const cartDetailsPromises = [];
         for (let i=0; i < activeOrders.length; i++) {
             let order_id = activeOrders[i]['id'];
@@ -237,6 +238,9 @@ async function getVendorActiveOrders(req, res, next) {
             order.user_id = activeOrders[j].user_id;
             order.table_id = activeOrders[j].table_id;
             order.order_id = activeOrders[j].id;
+            order.is_payment_requested = activeOrders[j].is_payment_requested;
+
+
             order.details = {
                 ordered,
                 completed,

@@ -232,17 +232,72 @@ async function placeOrder(req, res, next){
 }
 
 
-async function completePayment(req, res, next) {
+async function initiateRequestForPayment(req, res, next) {
     try {
         const db = req.app.get('db');
         const user_id = req.user.id;
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
+        // let total_bill = 0;
+        // let total_discount = 0;
+        // let payable_amt;
+        // if (order_details && order_details[0].order_id != null) {
+        //     order_id = order_details[0]['order_id'];
+        //     const cartDetails =await cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id);
+        //     for (let i=0; i < cartDetails.length; i++) {
+        //         if(cartDetails[i]['is_ordered']) {
+        //             total_bill += parseInt(cartDetails[i]['price']);
+        //             if (!_.isNull(cartDetails[i]['discount'] )) {
+        //                 total_discount += parseInt(cartDetails[i]['price']) * parseInt(cartDetails[i]['discount']) * 0.01;
+        //             }
+        //         }
+        //     }
+        //     payable_amt = total_bill - total_discount;
+        // } else {
+        //     payable_amt = 0;
+        // }
+        // update the row in database
+        if (order_details && order_details[0].order_id != null) { 
+            const order_id = order_details[0].order_id;
+            await orderMysql.updatePaymentRequest(db.mysql.write, order_id);
+        }
+        const responseData = {
+            meta: {
+                code: 200,
+                success: true,
+                message: 'Success',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    } catch (e) {
+        console.log(e);
+        const responseData = {
+            meta: {
+                code: 500,
+                success: false,
+                message: 'No items in cart',
+            },
+            data: null,
+        };
+        res.status(responseData.meta.code).json(responseData);
+    }
+}
+ 
+async function completePayment(req, res, next) {
+    try {
+        const db = req.app.get('db');
+        const {
+            id: vendor_id
+        } = req.user;
+       console.log(typeof req.body);
+       console.log(req.body);
+        const order_details = await orderMysql.getOrderIdByTableAndVendorId(db.mysql.read, vendor_id, req.body.table_id);
         console.log("IRDER ID", order_details);
         let total_bill = 0;
         let total_discount = 0;
         let payable_amt;
-        if (order_details && order_details[0].order_id != null) {
-            order_id = order_details[0]['order_id'];
+        if (order_details && order_details[0].id != null) {
+            order_id = order_details[0]['id'];
             const cartDetails =await cartMysql.getOrderCompleteDetailsById(db.mysql.read, order_id);
             for (let i=0; i < cartDetails.length; i++) {
                 if(cartDetails[i]['is_ordered']) {
@@ -399,4 +454,5 @@ module.exports = {
     getOrderHistory,
     registerQuickRequest,
     resolveQuickRequest,
+    initiateRequestForPayment,
 }

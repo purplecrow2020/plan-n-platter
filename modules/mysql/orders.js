@@ -100,5 +100,19 @@ module.exports = class Orders {
         const sql = "select * from orders where vendor_id = ? and table_id = ? and is_active = 1";
         return database.query(sql, [vendor_id, table_id]);
     }
+    
+    static updatePaymentRequest(database, order_id) {
+        const obj = {
+            is_payment_requested: 1,
+        };
+        const sql = "update orders SET  ?  where id = ?";
+        return database.query(sql, [obj, order_id]);
+    }
+
+    static getOrderIdByTableAndVendorId(database, vendor_id, table_id) {
+        const sql = `select * from orders where vendor_id  = 1 and table_id = ${table_id} order by id desc limit 1`;
+        console.log(sql);
+        return database.query(sql);
+    }
 }
 
