@@ -21,7 +21,7 @@ async function getMenu(req, res, next) {
         const order_details = await orderMysql.getOrderId(db.mysql.read, user_id);
         if (order_details && order_details[0].order_id != null) {
             order_id = order_details[0]['order_id'];
-            menuDetails = await menuMysql.getMenuByVendorIdWithOrderDetails(db.mysql.read, vendor_id, order_id);
+            menuDetails = await menuMysql.getMenuByVendorIdWithOrderDetails(db.mysql.read, vendor_id, order_id, req.headers['is_request_on_panel']);
         } else {
             menuDetails = await menuMysql.getMenuByVendorId(db.mysql.read, vendor_id);
         }
