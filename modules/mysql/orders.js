@@ -42,7 +42,7 @@ module.exports = class Orders {
     }
 
     static getActiveOrderByVendorId(database, vendor_id) {
-        const sql = "select * from orders where vendor_id = ? and is_completed = 0 order by created_at desc";
+        const sql = "select * from orders where vendor_id = ? and is_active = 1 and is_completed = 0 order by created_at desc";
         return database.query(sql, vendor_id);
     }
 
