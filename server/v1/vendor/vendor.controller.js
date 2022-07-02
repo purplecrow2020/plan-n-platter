@@ -370,7 +370,7 @@ async function getVendorCompletedOrders(req, res) {
             order.user_id = completedOrders[j].user_id;
             order.table_id = completedOrders[j].table_id;
             order.order_id = completedOrders[j].id;
-            order.timestamp = moment(completedOrders[j].created_at).format('MM/DD/YYYY HH:mm:ss');
+            order.timestamp = moment(completedOrders[j].created_at).add(5, 'h').add(30, 'm').format('MM/DD/YYYY HH:mm:ss');
             order.details = {
              ...details
             }
