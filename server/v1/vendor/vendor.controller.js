@@ -371,8 +371,8 @@ async function getVendorCompletedOrders(req, res) {
             order.table_id = completedOrders[j].table_id;
             order.order_id = completedOrders[j].id;
             order.timestamp = moment(completedOrders[j].created_at).add(5, 'h').add(30, 'm').format('MM/DD/YYYY HH:mm:ss');
-            order.amt_payable = completedOrders[i].amt_payable;
-            order.discount = completedOrders[i].discount;
+            order.amt_payable = completedOrders[j].amt_payable;
+            order.discount = completedOrders[j].discount;
             order.details = {
              ...details
             }
